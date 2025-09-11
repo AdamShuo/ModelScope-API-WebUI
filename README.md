@@ -17,9 +17,68 @@
 ### 环境要求
 
 - Python 3.8+
-- ModelScope API Token
+- ModelScope API Token（免费获取，详见下方说明）
 
-### 安装依赖
+### 🔑 获取 ModelScope API Token
+
+使用本应用需要先获取ModelScope API Token，完全免费且提供每日2000次调用额度：
+
+#### 📋 获取步骤
+
+1. **注册魔搭账号**
+   - 访问 [魔搭社区](https://modelscope.cn)
+   - 点击右上角"登录/注册"
+   - 使用手机号或邮箱完成注册
+
+2. **绑定阿里云账号**
+   - 登录魔搭账号后，进入个人中心
+   - 按提示绑定阿里云账号（如无阿里云账号需先注册）
+   - 绑定成功后即可获得每日2000次免费调用额度
+
+3. **创建访问令牌**
+   - 访问 [访问令牌页面](https://modelscope.cn/my/myaccesstoken)
+   - 点击"新建令牌"
+   - 设置令牌名称（如：WebUI-Token）
+   - 复制生成的访问令牌
+
+4. **在应用中使用**
+   - 启动本应用后，在任意功能模块中粘贴API Token
+   - 勾选"保存API Token到浏览器缓存"以便下次自动加载
+   - 开始使用各项AI功能
+
+#### 💡 使用提示
+
+- **免费额度**：每日2000次调用，足够个人使用
+- **重置时间**：每日0点重置调用次数
+- **Token安全**：请妥善保管您的API Token，不要分享给他人
+- **多设备使用**：同一Token可在多个设备上使用
+
+### 🎯 一键启动（推荐）
+
+项目提供了自动化启动脚本，无需手动配置环境：
+
+#### Windows 用户
+- **首次使用**：双击 `run_windows.bat`
+- **日常使用**：双击 `run_windows_existvenv.bat`（更快）
+
+#### Linux/macOS 用户
+```bash
+chmod +x run_linux.sh
+./run_linux.sh
+```
+
+#### 🌟 脚本特性
+- ✅ **自动环境管理**：自动创建和激活虚拟环境
+- ✅ **依赖自动安装**：自动安装所需依赖包
+- ✅ **深色主题**：自动使用深色主题启动
+- ✅ **智能等待**：等待8秒确保应用完全启动
+- ✅ **自动打开浏览器**：无需手动输入地址
+- ✅ **中英文提示**：友好的双语操作提示
+- ✅ **安全退出**：按指定键安全停止应用
+
+### 手动安装（可选）
+
+如果需要手动配置环境：
 
 ```bash
 # 克隆项目
@@ -34,20 +93,16 @@ source .venv/bin/activate  # Linux/Mac
 
 # 安装依赖
 pip install -r requirements.txt
-```
 
-**依赖说明：**
-- 所有必需的依赖包都列在 `requirements.txt` 文件中
-- 包含核心功能所需的基础库和可选的增强功能库
-- 建议使用虚拟环境以避免包冲突
-
-### 启动应用
-
-```bash
+# 启动应用
 python gradio_app.py
 ```
 
-应用将在 http://localhost:7860 启动，支持局域网访问。
+### 🌐 访问地址
+
+- **本地访问**: http://127.0.0.1:7860
+- **深色主题**: http://127.0.0.1:7860/?__theme=dark（脚本默认）
+- **浅色主题**: http://127.0.0.1:7860/?__theme=light
 
 ## 🎯 功能模块
 
@@ -79,9 +134,15 @@ python gradio_app.py
 
 ### API Token设置
 
-1. 在任意功能模块中输入您的ModelScope API Token
-2. 勾选"保存API Token到浏览器缓存"以便下次自动加载
-3. Token将安全保存在浏览器本地存储中
+1. **获取Token**：按照上方"🔑 获取 ModelScope API Token"步骤获取您的访问令牌
+2. **输入Token**：在任意功能模块中粘贴您的ModelScope API Token
+3. **保存设置**：勾选"保存API Token到浏览器缓存"以便下次自动加载
+4. **安全存储**：Token将加密保存在本地，确保使用安全
+
+💡 **首次使用提示**：
+- 确保已完成魔搭账号注册和阿里云账号绑定
+- 每日有2000次免费调用额度，足够个人使用
+- Token输入一次后会自动保存，无需重复输入
 
 ### 模型配置
 
@@ -126,6 +187,10 @@ ModelScope-API-WebUI/
 ├── modelscope_config.json     # 模型配置文件
 ├── requirements.txt           # 依赖包列表
 ├── README.md                  # 项目说明
+├── 运行说明.md                # 详细运行说明
+├── run_windows.bat            # Windows启动脚本（完整版）
+├── run_windows_existvenv.bat  # Windows启动脚本（快速版）
+├── run_linux.sh               # Linux/macOS启动脚本
 ├── .gitignore                # Git忽略文件
 └── .venv/                    # 虚拟环境（本地）
 ```
