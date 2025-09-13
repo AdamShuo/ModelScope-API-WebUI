@@ -8,9 +8,11 @@
 - **✏️ 图像编辑**：基于原图进行AI驱动的图像编辑和修改
 - **💬 文本对话**：支持多轮对话的智能聊天功能
 - **🔍 图生文**：图像描述和视觉问答功能
+- **🖼️ Photopea**：内嵌在线图像编辑器，类似Photoshop的专业编辑功能
 - **🌐 现代化界面**：基于Gradio构建的直观Web界面
 - **⚙️ 灵活配置**：支持模型切换、参数调节和API Token缓存
 - **📱 响应式设计**：支持桌面和移动设备访问
+- **🔧 模块化架构**：代码结构清晰，便于维护和扩展
 
 ## 🚀 快速开始
 
@@ -130,6 +132,13 @@ python gradio_app.py
 - 支持自定义分析提示词
 - 多语言输出支持
 
+### 5. Photopea 在线编辑器
+- 内嵌专业级在线图像编辑器
+- 支持 PSD、XCF、Sketch 等多种格式
+- 提供图层、滤镜、画笔等专业工具
+- 无需安装，直接在浏览器中使用
+- 完全免费，功能媲美 Photoshop
+
 ## ⚙️ 配置说明
 
 ### API Token设置
@@ -178,12 +187,22 @@ python gradio_app.py
 - **图像处理**：PIL (Pillow)
 - **HTTP客户端**：Requests
 - **AI模型接口**：OpenAI兼容接口
+- **模块化设计**：功能模块独立，便于维护和扩展
+- **加密存储**：API Token 本地加密保存
 
 ## 📦 项目结构
 
 ```
 ModelScope-API-WebUI/
-├── gradio_app.py              # 主应用文件
+├── gradio_app.py              # 主应用文件（模块化重构版）
+├── modules/                   # 功能模块文件夹
+│   ├── __init__.py           # 模块包初始化
+│   ├── common.py             # 公共函数和工具
+│   ├── text_to_image.py      # 文生图模块
+│   ├── image_edit.py         # 图像编辑模块
+│   ├── text_chat.py          # 文本对话模块
+│   ├── image_to_text.py      # 图生文模块
+│   └── photopea.py           # Photopea在线编辑器模块
 ├── modelscope_config.json     # 模型配置文件
 ├── requirements.txt           # 依赖包列表
 ├── README.md                  # 项目说明
@@ -195,6 +214,26 @@ ModelScope-API-WebUI/
 └── .venv/                    # 虚拟环境（本地）
 ```
 
+### 🏗️ 模块化架构说明
+
+项目采用模块化设计，将不同功能分离到独立的模块中：
+
+- **`gradio_app.py`**：主应用文件，负责界面组装和事件绑定
+- **`modules/common.py`**：公共功能模块，包含API Token管理、配置加载、图像处理等
+- **`modules/text_to_image.py`**：文生图功能的完整实现
+- **`modules/image_edit.py`**：图像编辑功能的完整实现
+- **`modules/text_chat.py`**：文本对话功能的完整实现
+- **`modules/image_to_text.py`**：图生文功能的完整实现
+- **`modules/photopea.py`**：Photopea在线编辑器的界面实现
+
+#### 🎯 模块化优势
+
+1. **代码组织清晰**：每个功能模块独立管理，职责单一
+2. **便于维护**：修改特定功能时只需编辑对应模块
+3. **易于扩展**：添加新功能只需创建新模块并在主文件中引用
+4. **降低耦合**：模块间依赖关系清晰，减少代码耦合
+5. **提高可读性**：主文件从近1000行缩减到约400行
+
 ## 🛠️ 开发指南
 
 ### 添加新模型
@@ -202,13 +241,66 @@ ModelScope-API-WebUI/
 1. 在 `modelscope_config.json` 中添加模型名称
 2. 重启应用即可在界面中看到新模型
 
+### 添加新功能模块
+
+1. **创建模块文件**：在 `modules/` 文件夹中创建新的 `.py` 文件
+2. **实现功能函数**：编写具体的功能实现代码
+3. **创建界面函数**：编写 Gradio 界面创建函数
+4. **主文件集成**：在 `gradio_app.py` 中导入并使用新模块
+
+#### 示例：添加新模块
+
+```python
+# modules/new_feature.py
+def new_feature_function(param1, param2):
+    """新功能的实现"""
+    # 功能实现代码
+    return result
+
+def create_new_feature_interface():
+    """创建新功能的界面"""
+    with gr.Tab("新功能"):
+        # 界面组件定义
+        pass
+```
+
+```python
+# gradio_app.py 中添加导入和使用
+from modules.new_feature import new_feature_function, create_new_feature_interface
+
+# 在 create_gradio_interface() 中调用
+create_new_feature_interface()
+```
+
+### 修改现有功能
+
+1. **定位模块**：找到对应功能的模块文件
+2. **修改实现**：直接在模块文件中修改功能实现
+3. **测试验证**：重启应用测试修改效果
+
 ### 自定义界面
 
-修改 `gradio_app.py` 中的界面组件和布局来自定义用户界面。
+- **主界面布局**：修改 `gradio_app.py` 中的界面组装逻辑
+- **单个模块界面**：修改对应模块文件中的界面创建函数
+- **公共组件**：在 `modules/common.py` 中添加可复用的界面组件
 
 ### API集成
 
-项目使用ModelScope API，支持异步任务处理和状态轮询。
+项目使用ModelScope API，支持异步任务处理和状态轮询。相关功能主要在以下模块中：
+
+- **API请求**：`modules/common.py` 中的 `make_api_request_with_retry()`
+- **文生图API**：`modules/text_to_image.py`
+- **图像编辑API**：`modules/image_edit.py`
+- **对话API**：`modules/text_chat.py`
+- **视觉API**：`modules/image_to_text.py`
+
+### 代码规范
+
+1. **模块职责单一**：每个模块只负责一个主要功能
+2. **函数命名清晰**：使用描述性的函数名
+3. **添加文档字符串**：为函数和模块添加说明文档
+4. **错误处理**：适当添加异常处理和用户友好的错误信息
+5. **导入规范**：相对导入模块内部依赖，绝对导入外部依赖
 
 ## 🔍 故障排除
 
