@@ -14,7 +14,8 @@ from modules.text_to_image import generate_image
 from modules.image_edit import edit_image
 from modules.text_chat import chat_with_model, clear_chat
 from modules.image_to_text import analyze_image_with_text
-from modules.photopea import create_photopea_interface
+from modules.photopea import create_photopea_collapsible_component
+from modules.whiteboard import create_whiteboard_tab, switch_whiteboard_tool
 
 def create_text_to_image_tab(config, saved_token):
     """创建文生图标签页"""
@@ -275,9 +276,10 @@ def create_gradio_interface():
         image_edit_components = create_image_edit_tab(config, saved_token)
         text_chat_components = create_text_chat_tab(config, saved_token)
         image_to_text_components = create_image_to_text_tab(config, saved_token)
+        whiteboard_components = create_whiteboard_tab(config, saved_token)
         
-        # 创建 Photopea 标签页
-        create_photopea_interface()
+        # 在底部添加可折叠的 Photopea 编辑器（在所有标签中都可见）
+        create_photopea_collapsible_component()
         
         # 界面切换逻辑
         def toggle_size_controls(adaptive_ratio):
@@ -415,6 +417,13 @@ def create_gradio_interface():
                 image_to_text_components['temperature']
             ],
             outputs=[image_to_text_components['output_text']]
+        )
+        
+        # 绑定事件 - 手绘白板
+        whiteboard_components['whiteboard_tool'].change(
+            fn=switch_whiteboard_tool,
+            inputs=[whiteboard_components['whiteboard_tool']],
+            outputs=[whiteboard_components['excalidraw_frame'], whiteboard_components['tldraw_frame']]
         )
         
         # 添加简单的JavaScript代码用于界面增强

@@ -9,6 +9,7 @@
 - **💬 文本对话**：支持多轮对话的智能聊天功能
 - **🔍 图生文**：图像描述和视觉问答功能
 - **🖼️ Photopea**：内嵌在线图像编辑器，类似Photoshop的专业编辑功能
+- **✍️ 手绘白板**：集成 Excalidraw 和 tldraw 两款专业手绘白板工具
 - **🌐 现代化界面**：基于Gradio构建的直观Web界面
 - **⚙️ 灵活配置**：支持模型切换、参数调节和API Token缓存
 - **📱 响应式设计**：支持桌面和移动设备访问
@@ -139,6 +140,13 @@ python gradio_app.py
 - 无需安装，直接在浏览器中使用
 - 完全免费，功能媲美 Photoshop
 
+### 6. 手绘白板
+- **Excalidraw**：简洁优雅的手绘风格白板，支持图形绘制、文本标注
+- **tldraw**：功能丰富的现代化白板工具，支持多种绘图模式
+- **状态保持**：两个白板工具独立运行，切换时保持各自的编辑状态
+- **实时协作**：支持多人实时协作编辑（需要相应服务支持）
+- **导出功能**：支持导出为 PNG、SVG 等多种格式
+
 ## ⚙️ 配置说明
 
 ### API Token设置
@@ -202,7 +210,8 @@ ModelScope-API-WebUI/
 │   ├── image_edit.py         # 图像编辑模块
 │   ├── text_chat.py          # 文本对话模块
 │   ├── image_to_text.py      # 图生文模块
-│   └── photopea.py           # Photopea在线编辑器模块
+│   ├── photopea.py           # Photopea在线编辑器模块
+│   └── whiteboard.py         # 手绘白板模块
 ├── modelscope_config.json     # 模型配置文件
 ├── requirements.txt           # 依赖包列表
 ├── README.md                  # 项目说明
@@ -225,6 +234,7 @@ ModelScope-API-WebUI/
 - **`modules/text_chat.py`**：文本对话功能的完整实现
 - **`modules/image_to_text.py`**：图生文功能的完整实现
 - **`modules/photopea.py`**：Photopea在线编辑器的界面实现
+- **`modules/whiteboard.py`**：手绘白板功能，集成 Excalidraw 和 tldraw
 
 #### 🎯 模块化优势
 
