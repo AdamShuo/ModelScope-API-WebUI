@@ -28,6 +28,7 @@
     "black-forest-labs/FLUX.1-Kontext-dev"
   ],
   "text_models": [
+    "iic/Tongyi-DeepResearch-30B-A3B",
     "Qwen/Qwen3-Next-80B-A3B-Instruct",
     "Qwen/Qwen3-Coder-480B-A35B-Instruct",
     "Qwen/Qwen3-Coder-480B-A35B-Chat",
