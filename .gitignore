@@ -53,5 +53,12 @@ Thumbs.db
 *.tmp
 *.temp
 
+# API Token and sensitive files
+.api_token
+.token_key
+*.key
+*.token
+*.secret
+
 # Gradio cache
 .gradio/
