@@ -4,6 +4,11 @@ ModelScope API WebUI - 主应用文件
 """
 
 import gradio as gr
+import json
+import os
+import datetime
+from PIL import Image
+from PIL.ExifTags import TAGS
 from modules.common import (
     load_config, 
     load_api_token, 
@@ -16,6 +21,209 @@ from modules.text_chat import chat_with_model, clear_chat
 from modules.image_to_text import analyze_image_with_text
 from modules.photopea import create_photopea_collapsible_component
 from modules.whiteboard import create_whiteboard_tab, switch_whiteboard_tool
+
+def save_text_to_image_params(model, prompt, negative_prompt, width, height, steps, guidance, seed, include_metadata):
+    """保存文生图参数为JSON文件"""
+    import tempfile
+    import os
+    
+    params = {
+        "model": model,
+        "prompt": prompt,
+        "negative_prompt": negative_prompt,
+        "width": width,
+        "height": height,
+        "steps": steps,
+        "guidance": guidance,
+        "seed": seed,
+        "include_metadata": include_metadata,
+        "timestamp": datetime.datetime.now().isoformat(),
+        "type": "text_to_image"
+    }
+    
+    # 生成文件名
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"t2i_{timestamp}.json"
+    
+    # 创建临时文件，但使用自定义文件名
+    temp_dir = tempfile.gettempdir()
+    file_path = os.path.join(temp_dir, filename)
+    
+    # 写入文件
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(params, f, indent=2, ensure_ascii=False)
+    
+    # 返回文件路径，Gradio会自动触发浏览器下载
+    return file_path
+
+def load_text_to_image_params(file):
+    """从文件加载文生图参数"""
+    if file is None:
+        return [gr.update()] * 8
+    
+    try:
+        # 当使用type="filepath"时，file是文件路径字符串
+        file_path = file if isinstance(file, str) else (file.name if hasattr(file, 'name') else str(file))
+        
+        # 如果是图像文件，尝试提取元数据
+        if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+            try:
+                image = Image.open(file_path)
+                exif_data = image.getexif()
+                
+                # 查找包含参数的EXIF字段 - 使用0x927C (MakerNote)标签
+                if 0x927C in exif_data:
+                    metadata_bytes = exif_data[0x927C]
+                    if isinstance(metadata_bytes, bytes):
+                        try:
+                            # 尝试解码JSON数据
+                            json_str = metadata_bytes.decode('utf-8', errors='ignore')
+                            if json_str.startswith('{'):
+                                params = json.loads(json_str)
+                            else:
+                                # 如果没有找到参数，返回默认值
+                                return [gr.update()] * 8
+                        except Exception as decode_error:
+                            print(f"元数据解码失败: {decode_error}")
+                            return [gr.update()] * 8
+                    else:
+                        return [gr.update()] * 8
+                else:
+                    # 如果没有找到参数，返回默认值
+                    return [gr.update()] * 8
+            except Exception as img_error:
+                print(f"图像处理失败: {img_error}")
+                return [gr.update()] * 8
+        else:
+            # 如果是JSON文件，直接读取，处理编码问题
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    params = json.load(f)
+            except UnicodeDecodeError:
+                # 如果UTF-8失败，尝试其他编码
+                with open(file_path, 'r', encoding='gbk') as f:
+                    params = json.load(f)
+        
+        # 更新参数控件
+        updates = [
+            gr.update(value=params.get('model', '')),
+            gr.update(value=params.get('prompt', '')),
+            gr.update(value=params.get('negative_prompt', '')),
+            gr.update(value=params.get('width', 512)),
+            gr.update(value=params.get('height', 512)),
+            gr.update(value=params.get('steps', 30)),
+            gr.update(value=params.get('guidance', 7.5)),
+            gr.update(value=params.get('seed', -1))
+        ]
+        
+        return updates
+        
+    except Exception as e:
+        print(f"加载参数失败: {e}")
+        return [gr.update()] * 8
+
+def save_image_edit_params(model, prompt, negative_prompt, adaptive_ratio, width, height, long_edge, steps, guidance, seed, include_metadata):
+    """保存图像编辑参数为JSON文件"""
+    import tempfile
+    import os
+    
+    params = {
+        "model": model,
+        "prompt": prompt,
+        "negative_prompt": negative_prompt,
+        "adaptive_ratio": adaptive_ratio,
+        "width": width,
+        "height": height,
+        "long_edge": long_edge,
+        "steps": steps,
+        "guidance": guidance,
+        "seed": seed,
+        "include_metadata": include_metadata,
+        "timestamp": datetime.datetime.now().isoformat(),
+        "type": "image_edit"
+    }
+    
+    # 生成文件名
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"i2i_{timestamp}.json"
+    
+    # 创建临时文件，但使用自定义文件名
+    temp_dir = tempfile.gettempdir()
+    file_path = os.path.join(temp_dir, filename)
+    
+    # 写入文件
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(params, f, indent=2, ensure_ascii=False)
+    
+    # 返回文件路径，Gradio会自动触发浏览器下载
+    return file_path
+
+def load_image_edit_params(file):
+    """从文件加载图像编辑参数"""
+    if file is None:
+        return [gr.update()] * 10
+    
+    try:
+        # 当使用type="filepath"时，file是文件路径字符串
+        file_path = file if isinstance(file, str) else (file.name if hasattr(file, 'name') else str(file))
+        
+        # 如果是图像文件，尝试提取元数据
+        if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+            try:
+                image = Image.open(file_path)
+                exif_data = image.getexif()
+                
+                # 查找包含参数的EXIF字段 - 使用0x927C (MakerNote)标签
+                if 0x927C in exif_data:
+                    metadata_bytes = exif_data[0x927C]
+                    if isinstance(metadata_bytes, bytes):
+                        try:
+                            # 尝试解码JSON数据
+                            json_str = metadata_bytes.decode('utf-8', errors='ignore')
+                            if json_str.startswith('{'):
+                                params = json.loads(json_str)
+                            else:
+                                # 如果没有找到参数，返回默认值
+                                return [gr.update()] * 10
+                        except Exception as decode_error:
+                            print(f"元数据解码失败: {decode_error}")
+                            return [gr.update()] * 10
+                    else:
+                        return [gr.update()] * 10
+                else:
+                    # 如果没有找到参数，返回默认值
+                    return [gr.update()] * 10
+            except:
+                return [gr.update()] * 10
+        else:
+            # 如果是JSON文件，直接读取，处理编码问题
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    params = json.load(f)
+            except UnicodeDecodeError:
+                # 如果UTF-8失败，尝试其他编码
+                with open(file_path, 'r', encoding='gbk') as f:
+                    params = json.load(f)
+        
+        # 更新参数控件
+        updates = [
+            gr.update(value=params.get('model', '')),
+            gr.update(value=params.get('prompt', '')),
+            gr.update(value=params.get('negative_prompt', '')),
+            gr.update(value=params.get('adaptive_ratio', True)),
+            gr.update(value=params.get('width', 512)),
+            gr.update(value=params.get('height', 512)),
+            gr.update(value=params.get('long_edge', 1024)),
+            gr.update(value=params.get('steps', 30)),
+            gr.update(value=params.get('guidance', 7.5)),
+            gr.update(value=params.get('seed', -1))
+        ]
+        
+        return updates
+        
+    except Exception as e:
+        print(f"加载参数失败: {e}")
+        return [gr.update()] * 10
 
 def create_text_to_image_tab(config, saved_token):
     """创建文生图标签页"""
@@ -62,7 +270,32 @@ def create_text_to_image_tab(config, saved_token):
             with gr.Column(scale=1):
                 output_image_gen = gr.Image(label="生成结果", type="pil")
                 output_message_gen = gr.Textbox(label="输出信息", interactive=False)
+                
+                # 参数管理控件 - 移动到右侧栏
+                with gr.Group():
+                    include_metadata_gen = gr.Checkbox(
+                        label="包含生成参数元数据",
+                        value=True,
+                        info="在生成的图像中包含除API Token外的所有生成参数"
+                    )
+                    
+                    # 保存和加载参数按钮
+                    with gr.Row():
+                        save_params_btn_gen = gr.Button("保存参数", variant="secondary")
+                        load_params_btn_gen = gr.Button("加载参数", variant="secondary")
+                    
+                    # 文件上传组件
+                    file_upload_gen = gr.File(
+                        label="上传参数文件或图像",
+                        file_types=[".json", ".png", ".jpg", ".jpeg", ".webp"],
+                        type="filepath"
+                    )
+                
                 gen_btn = gr.Button("生成图像", variant="primary")
+                
+                # 隐藏的JSON输出和文件下载组件
+                json_output_gen = gr.Textbox(label="参数JSON", visible=False)
+                file_download_gen = gr.File(label="下载参数文件", visible=True, type="filepath")
         
         return {
             'api_token': api_token_gen,
@@ -75,6 +308,12 @@ def create_text_to_image_tab(config, saved_token):
             'steps': steps_gen,
             'guidance': guidance_gen,
             'seed': seed_gen,
+            'include_metadata': include_metadata_gen,
+            'save_params_btn': save_params_btn_gen,
+            'load_params_btn': load_params_btn_gen,
+            'file_upload': file_upload_gen,
+            'json_output': json_output_gen,
+            'file_download': file_download_gen,
             'output_image': output_image_gen,
             'output_message': output_message_gen,
             'button': gen_btn
@@ -137,7 +376,32 @@ def create_image_edit_tab(config, saved_token):
             with gr.Column(scale=1):
                 output_image_edit = gr.Image(label="编辑结果", type="pil")
                 output_message_edit = gr.Textbox(label="输出信息", interactive=False)
+                
+                # 参数管理控件 - 移动到右侧栏
+                with gr.Group():
+                    include_metadata_edit = gr.Checkbox(
+                        label="包含生成参数元数据",
+                        value=True,
+                        info="在生成的图像中包含除API Token外的所有生成参数"
+                    )
+                    
+                    # 保存和加载参数按钮
+                    with gr.Row():
+                        save_params_btn_edit = gr.Button("保存参数", variant="secondary")
+                        load_params_btn_edit = gr.Button("加载参数", variant="secondary")
+                    
+                    # 文件上传组件
+                    file_upload_edit = gr.File(
+                        label="上传参数文件或图像",
+                        file_types=[".json", ".png", ".jpg", ".jpeg", ".webp"],
+                        type="filepath"
+                    )
+                
                 edit_btn = gr.Button("编辑图像", variant="primary")
+                
+                # 隐藏的JSON输出和文件下载组件
+                json_output_edit = gr.Textbox(label="参数JSON", visible=False)
+                file_download_edit = gr.File(label="下载参数文件", visible=True, type="filepath")
         
         return {
             'api_token': api_token_edit,
@@ -156,6 +420,12 @@ def create_image_edit_tab(config, saved_token):
             'steps': steps_edit,
             'guidance': guidance_edit,
             'seed': seed_edit,
+            'include_metadata': include_metadata_edit,
+            'save_params_btn': save_params_btn_edit,
+            'load_params_btn': load_params_btn_edit,
+            'file_upload': file_upload_edit,
+            'json_output': json_output_edit,
+            'file_download': file_download_edit,
             'output_image': output_image_edit,
             'output_message': output_message_edit,
             'button': edit_btn
@@ -299,6 +569,38 @@ def create_gradio_interface():
             outputs=[token_status]
         )
         
+        # 绑定文生图保存和加载参数事件
+        text_to_image_components['save_params_btn'].click(
+            fn=save_text_to_image_params,
+            inputs=[
+                text_to_image_components['model'],
+                text_to_image_components['prompt'],
+                text_to_image_components['negative_prompt'],
+                text_to_image_components['width'],
+                text_to_image_components['height'],
+                text_to_image_components['steps'],
+                text_to_image_components['guidance'],
+                text_to_image_components['seed'],
+                text_to_image_components['include_metadata']
+            ],
+            outputs=[text_to_image_components['file_download']]
+        )
+        
+        text_to_image_components['load_params_btn'].click(
+            fn=load_text_to_image_params,
+            inputs=[text_to_image_components['file_upload']],
+            outputs=[
+                text_to_image_components['model'],
+                text_to_image_components['prompt'],
+                text_to_image_components['negative_prompt'],
+                text_to_image_components['width'],
+                text_to_image_components['height'],
+                text_to_image_components['steps'],
+                text_to_image_components['guidance'],
+                text_to_image_components['seed']
+            ]
+        )
+        
         text_to_image_components['button'].click(
             fn=generate_image,
             inputs=[
@@ -310,7 +612,8 @@ def create_gradio_interface():
                 text_to_image_components['height'],
                 text_to_image_components['steps'],
                 text_to_image_components['guidance'],
-                text_to_image_components['seed']
+                text_to_image_components['seed'],
+                text_to_image_components['include_metadata']
             ],
             outputs=[text_to_image_components['output_image'], text_to_image_components['output_message']]
         )
@@ -334,6 +637,42 @@ def create_gradio_interface():
             outputs=[image_edit_components['input_image_info'], image_edit_components['input_image_info']]
         )
         
+        # 绑定图像编辑保存和加载参数事件
+        image_edit_components['save_params_btn'].click(
+            fn=save_image_edit_params,
+            inputs=[
+                image_edit_components['model'],
+                image_edit_components['prompt'],
+                image_edit_components['negative_prompt'],
+                image_edit_components['adaptive_ratio'],
+                image_edit_components['width'],
+                image_edit_components['height'],
+                image_edit_components['long_edge'],
+                image_edit_components['steps'],
+                image_edit_components['guidance'],
+                image_edit_components['seed'],
+                image_edit_components['include_metadata']
+            ],
+            outputs=[image_edit_components['file_download']]
+        )
+        
+        image_edit_components['load_params_btn'].click(
+            fn=load_image_edit_params,
+            inputs=[image_edit_components['file_upload']],
+            outputs=[
+                image_edit_components['model'],
+                image_edit_components['prompt'],
+                image_edit_components['negative_prompt'],
+                image_edit_components['adaptive_ratio'],
+                image_edit_components['width'],
+                image_edit_components['height'],
+                image_edit_components['long_edge'],
+                image_edit_components['steps'],
+                image_edit_components['guidance'],
+                image_edit_components['seed']
+            ]
+        )
+        
         image_edit_components['button'].click(
             fn=edit_image,
             inputs=[
@@ -348,7 +687,8 @@ def create_gradio_interface():
                 image_edit_components['long_edge'],
                 image_edit_components['steps'],
                 image_edit_components['guidance'],
-                image_edit_components['seed']
+                image_edit_components['seed'],
+                image_edit_components['include_metadata']
             ],
             outputs=[image_edit_components['output_image'], image_edit_components['output_message']]
         )

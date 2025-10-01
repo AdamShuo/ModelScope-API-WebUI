@@ -12,7 +12,7 @@ from PIL import Image
 from io import BytesIO
 from .common import load_config, make_api_request_with_retry, calculate_adaptive_size
 
-def edit_image(api_token, model, image, prompt, negative_prompt, adaptive_ratio, width, height, long_edge, steps, guidance, seed):
+def edit_image(api_token, model, image, prompt, negative_prompt, adaptive_ratio, width, height, long_edge, steps, guidance, seed, include_metadata=True):
     """图像编辑功能"""
     config = load_config()
     
@@ -148,6 +148,46 @@ def edit_image(api_token, model, image, prompt, negative_prompt, adaptive_ratio,
                 if img_response.status_code == 200:
                     img_data = BytesIO(img_response.content)
                     result_image = Image.open(img_data)
+                    
+                    # 添加元数据到图像
+                    if include_metadata:
+                        metadata = {
+                            'model': model,
+                            'prompt': prompt,
+                            'negative_prompt': negative_prompt,
+                            'adaptive_ratio': adaptive_ratio,
+                            'width': final_width,
+                            'height': final_height,
+                            'original_width': width,
+                            'original_height': height,
+                            'long_edge': long_edge,
+                            'steps': steps,
+                            'guidance': guidance,
+                            'seed': seed,
+                            'task_id': task_id
+                        }
+                        
+                        # 将元数据转换为JSON字符串并添加到EXIF数据中
+                        metadata_json = json.dumps(metadata, ensure_ascii=False)
+                        
+                        # 保存图像到内存并重新加载以添加EXIF数据
+                        img_buffer = BytesIO()
+                        result_image.save(img_buffer, format='PNG', exif=result_image.getexif())
+                        
+                        # 重新加载图像并添加自定义EXIF标签
+                        from PIL.ExifTags import TAGS
+                        exif_dict = result_image.getexif()
+                        
+                        # 使用自定义标签存储元数据（使用私有标签范围）
+                        # 0x927C 是 MakerNote 标签，常用于存储自定义数据
+                        exif_dict[0x927C] = metadata_json.encode('utf-8')
+                        
+                        # 保存带有EXIF数据的图像
+                        img_buffer_with_exif = BytesIO()
+                        result_image.save(img_buffer_with_exif, format='PNG', exif=exif_dict)
+                        img_buffer_with_exif.seek(0)
+                        result_image = Image.open(img_buffer_with_exif)
+                    
                     return result_image, f"图像编辑成功！任务ID: {task_id}, 尺寸: {final_width}x{final_height}"
                 else:
                     return None, f"图片下载失败: {img_response.status_code}"

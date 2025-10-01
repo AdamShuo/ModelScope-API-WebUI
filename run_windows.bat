@@ -13,25 +13,52 @@ if not exist ".venv" (
         exit /b 1
     )
     echo Virtual environment created successfully / 虚拟环境创建成功
-)
-
-REM Activate virtual environment
-echo Activating virtual environment... / 正在激活虚拟环境...
-call .venv\Scripts\activate.bat
-if errorlevel 1 (
-    echo Failed to activate virtual environment / 激活虚拟环境失败
-    pause
-    exit /b 1
-)
-
-REM Install dependencies if needed
-if exist "requirements.txt" (
-    echo Installing dependencies... / 正在安装依赖包...
-    pip install -r requirements.txt
+    
+    REM Activate virtual environment
+    echo Activating virtual environment... / 正在激活虚拟环境...
+    call .venv\Scripts\activate.bat
     if errorlevel 1 (
-        echo Failed to install dependencies / 安装依赖包失败
+        echo Failed to activate virtual environment / 激活虚拟环境失败
         pause
         exit /b 1
+    )
+    
+    REM Install dependencies if needed
+    if exist "requirements.txt" (
+        echo Installing dependencies... / 正在安装依赖包...
+        pip install -r requirements.txt
+        if errorlevel 1 (
+            echo Failed to install dependencies / 安装依赖包失败
+            pause
+            exit /b 1
+        )
+        echo Dependencies installed successfully / 依赖包安装成功
+    )
+) else (
+    echo Virtual environment already exists / 虚拟环境已存在
+    echo Activating virtual environment... / 正在激活虚拟环境...
+    call .venv\Scripts\activate.bat
+    if errorlevel 1 (
+        echo Failed to activate virtual environment / 激活虚拟环境失败
+        pause
+        exit /b 1
+    )
+    echo Virtual environment activated successfully / 虚拟环境激活成功
+    
+    REM Check if dependencies are already installed
+    echo Checking if dependencies are installed... / 检查依赖包是否已安装...
+    pip list | findstr "gradio" >nul
+    if errorlevel 1 (
+        echo Installing dependencies... / 正在安装依赖包...
+        pip install -r requirements.txt
+        if errorlevel 1 (
+            echo Failed to install dependencies / 安装依赖包失败
+            pause
+            exit /b 1
+        )
+        echo Dependencies installed successfully / 依赖包安装成功
+    ) else (
+        echo Dependencies already installed / 依赖包已安装
     )
 )
 

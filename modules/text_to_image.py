@@ -10,7 +10,7 @@ from PIL import Image
 from io import BytesIO
 from .common import load_config, make_api_request_with_retry
 
-def generate_image(api_token, model, prompt, negative_prompt, width, height, steps, guidance, seed):
+def generate_image(api_token, model, prompt, negative_prompt, width, height, steps, guidance, seed, include_metadata=True):
     """文生图功能"""
     config = load_config()
     
@@ -100,6 +100,42 @@ def generate_image(api_token, model, prompt, negative_prompt, width, height, ste
                 if img_response.status_code == 200:
                     img_data = BytesIO(img_response.content)
                     result_image = Image.open(img_data)
+                    
+                    # 添加元数据到图像
+                    if include_metadata:
+                        metadata = {
+                            'model': model,
+                            'prompt': prompt,
+                            'negative_prompt': negative_prompt,
+                            'width': width,
+                            'height': height,
+                            'steps': steps,
+                            'guidance': guidance,
+                            'seed': seed,
+                            'task_id': task_id
+                        }
+                        
+                        # 将元数据转换为JSON字符串并添加到EXIF数据中
+                        metadata_json = json.dumps(metadata, ensure_ascii=False)
+                        
+                        # 保存图像到内存并重新加载以添加EXIF数据
+                        img_buffer = BytesIO()
+                        result_image.save(img_buffer, format='PNG', exif=result_image.getexif())
+                        
+                        # 重新加载图像并添加自定义EXIF标签
+                        from PIL.ExifTags import TAGS
+                        exif_dict = result_image.getexif()
+                        
+                        # 使用自定义标签存储元数据（使用私有标签范围）
+                        # 0x927C 是 MakerNote 标签，常用于存储自定义数据
+                        exif_dict[0x927C] = metadata_json.encode('utf-8')
+                        
+                        # 保存带有EXIF数据的图像
+                        img_buffer_with_exif = BytesIO()
+                        result_image.save(img_buffer_with_exif, format='PNG', exif=exif_dict)
+                        img_buffer_with_exif.seek(0)
+                        result_image = Image.open(img_buffer_with_exif)
+                    
                     return result_image, f"图像生成成功！任务ID: {task_id}"
                 else:
                     return None, f"图片下载失败: {img_response.status_code}"
