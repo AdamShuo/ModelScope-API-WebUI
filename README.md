@@ -61,19 +61,44 @@
 
 ### 🎯 一键启动（推荐）
 
-项目提供了自动化启动脚本，无需手动配置环境：
+项目提供了多种自动化启动脚本，满足不同使用场景：
 
-#### Windows 用户
+#### 🧠 智能启动（推荐）
+智能检测Python环境，自动选择最佳启动方式：
+
+##### Windows 用户
+双击运行 `run_windows_smart.bat`
+
+##### Linux/macOS 用户
+```bash
+chmod +x run_linux_smart.sh
+./run_linux_smart.sh
+```
+
+#### 🚀 传统启动方式
+如果智能启动遇到问题，可使用传统方式：
+
+##### Windows 用户
 - **首次使用**：双击 `run_windows.bat`
 - **日常使用**：双击 `run_windows_existvenv.bat`（更快）
 
-#### Linux/macOS 用户
+##### Linux/macOS 用户
 ```bash
 chmod +x run_linux.sh
 ./run_linux.sh
 ```
 
+#### 💻 无Python环境解决方案
+如果您的系统没有安装Python，请运行安装脚本：
+```bash
+python setup.py
+```
+或下载Python后重新运行智能启动脚本。
+
 #### 🌟 脚本特性
+- ✅ **智能环境检测**：自动检测Python可用性，选择最佳启动方式
+- ✅ **跨平台兼容**：支持Windows、Linux、macOS系统
+- ✅ **无Python支持**：即使没有系统Python也能运行
 - ✅ **自动环境管理**：自动创建和激活虚拟环境
 - ✅ **依赖自动安装**：自动安装所需依赖包
 - ✅ **深色主题**：自动使用深色主题启动
@@ -103,6 +128,22 @@ pip install -r requirements.txt
 # 启动应用
 python gradio_app.py
 ```
+
+### 🔧 环境设置脚本
+
+项目还提供了环境设置脚本，用于在没有Python环境的系统上自动安装Python和配置项目：
+
+```bash
+# 运行环境设置脚本
+python setup.py
+```
+
+该脚本会：
+- 自动检测操作系统类型
+- 下载并安装Python（如果需要）
+- 创建虚拟环境
+- 安装所有依赖包
+- 提供启动指导
 
 ### 🌐 访问地址
 
