@@ -61,9 +61,9 @@
 
 ### 🎯 一键启动（推荐）
 
-项目提供了多种自动化启动脚本，满足不同使用场景：
+项目提供智能启动脚本，自动检测Python环境并选择最佳启动方式：
 
-#### 🧠 智能启动（推荐）
+#### 🧠 智能启动
 智能检测Python环境，自动选择最佳启动方式：
 
 ##### Windows 用户
@@ -75,18 +75,12 @@ chmod +x run_linux_smart.sh
 ./run_linux_smart.sh
 ```
 
-#### 🚀 传统启动方式
-如果智能启动遇到问题，可使用传统方式：
-
-##### Windows 用户
-- **首次使用**：双击 `run_windows.bat`
-- **日常使用**：双击 `run_windows_existvenv.bat`（更快）
-
-##### Linux/macOS 用户
+#### 💻 无Python环境解决方案
+如果您的系统没有安装Python，请运行安装脚本：
 ```bash
-chmod +x run_linux.sh
-./run_linux.sh
+python setup.py
 ```
+或下载Python后重新运行智能启动脚本。
 
 #### 💻 无Python环境解决方案
 如果您的系统没有安装Python，请运行安装脚本：
@@ -96,7 +90,7 @@ python setup.py
 或下载Python后重新运行智能启动脚本。
 
 #### 🌟 脚本特性
-- ✅ **智能环境检测**：自动检测Python可用性，选择最佳启动方式
+- ✅ **智能环境检测**：自动检测Python可用性，优先使用虚拟环境Python
 - ✅ **跨平台兼容**：支持Windows、Linux、macOS系统
 - ✅ **无Python支持**：即使没有系统Python也能运行
 - ✅ **自动环境管理**：自动创建和激活虚拟环境
@@ -106,6 +100,7 @@ python setup.py
 - ✅ **自动打开浏览器**：无需手动输入地址
 - ✅ **中英文提示**：友好的双语操作提示
 - ✅ **安全退出**：按指定键安全停止应用
+- ✅ **环境隔离**：强制使用虚拟环境Python，防止污染系统环境
 
 ### 手动安装（可选）
 
@@ -269,9 +264,9 @@ ModelScope-API-WebUI/
 ├── requirements.txt           # 依赖包列表
 ├── README.md                  # 项目说明
 ├── 运行说明.md                # 详细运行说明
-├── run_windows.bat            # Windows启动脚本（完整版）
-├── run_windows_existvenv.bat  # Windows启动脚本（快速版）
-├── run_linux.sh               # Linux/macOS启动脚本
+├── run_windows_smart.bat      # Windows智能启动脚本
+├── run_linux_smart.sh         # Linux/macOS智能启动脚本
+├── setup.py                   # 跨平台安装脚本
 ├── .gitignore                # Git忽略文件
 └── .venv/                    # 虚拟环境（本地）
 ```
