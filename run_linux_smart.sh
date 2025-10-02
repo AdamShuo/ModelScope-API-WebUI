@@ -3,22 +3,22 @@
 echo "Starting ModelScope API WebUI (Smart Mode)... / 正在启动 ModelScope API WebUI (智能模式)..."
 echo
 
-# 检测Python是否可用
-echo "Checking Python availability... / 正在检查Python可用性..."
-if command -v python3 &> /dev/null; then
-    echo "Python3 is available, using system Python / Python3可用，使用系统Python"
-    PYTHON_CMD="python3"
-elif command -v python &> /dev/null; then
-    echo "Python is available, using system Python / Python可用，使用系统Python"
-    PYTHON_CMD="python"
+# 优先检查虚拟环境是否存在
+if [ -f ".venv/bin/python" ]; then
+    echo "Virtual environment found, using virtual environment Python / 找到虚拟环境，使用虚拟环境中的Python"
+    PYTHON_CMD=".venv/bin/python"
+    source .venv/bin/activate
 else
-    echo "Python not found in system PATH / 系统中未找到Python"
-    echo "Checking virtual environment Python... / 正在检查虚拟环境中的Python..."
-    if [ -f ".venv/bin/python" ]; then
-        echo "Using virtual environment Python / 使用虚拟环境中的Python"
-        PYTHON_CMD=".venv/bin/python"
+    # 如果虚拟环境不存在，检查系统Python
+    echo "Checking system Python availability... / 正在检查系统Python可用性..."
+    if command -v python3 &> /dev/null; then
+        echo "Python3 is available, using system Python / Python3可用，使用系统Python"
+        PYTHON_CMD="python3"
+    elif command -v python &> /dev/null; then
+        echo "Python is available, using system Python / Python可用，使用系统Python"
+        PYTHON_CMD="python"
     else
-        echo "ERROR: No Python found and virtual environment doesn't exist / 错误：未找到Python且虚拟环境不存在"
+        echo "ERROR: No Python found / 错误：未找到Python"
         echo
         echo "Please install Python 3.8+ or run setup script / 请安装Python 3.8+ 或运行安装脚本"
         echo "Ubuntu/Debian: sudo apt install python3 python3-pip"
@@ -38,24 +38,39 @@ if [ ! -d ".venv" ]; then
         exit 1
     fi
     echo "Virtual environment created successfully / 虚拟环境创建成功"
+    
+    # 激活新创建的虚拟环境
+    echo "Activating virtual environment... / 正在激活虚拟环境..."
+    source .venv/bin/activate
+    if [ $? -ne 0 ]; then
+        echo "Failed to activate virtual environment / 激活虚拟环境失败"
+        exit 1
+    fi
+else
+    # 如果虚拟环境已存在，确保激活它
+    echo "Virtual environment already exists / 虚拟环境已存在"
+    echo "Activating virtual environment... / 正在激活虚拟环境..."
+    source .venv/bin/activate
+    if [ $? -ne 0 ]; then
+        echo "Failed to activate virtual environment / 激活虚拟环境失败"
+        exit 1
+    fi
+    echo "Virtual environment activated successfully / 虚拟环境激活成功"
 fi
 
-# 激活虚拟环境
-echo "Activating virtual environment... / 正在激活虚拟环境..."
-source .venv/bin/activate
+# 检查依赖是否已安装
+echo "Checking if dependencies are installed... / 检查依赖包是否已安装..."
+pip list | grep -q "gradio"
 if [ $? -ne 0 ]; then
-    echo "Failed to activate virtual environment / 激活虚拟环境失败"
-    exit 1
-fi
-
-# 检查是否需要安装依赖
-if [ -f "requirements.txt" ]; then
-    echo "Checking and installing dependencies... / 正在检查并安装依赖包..."
+    echo "Installing dependencies... / 正在安装依赖包..."
     pip install -r requirements.txt
     if [ $? -ne 0 ]; then
         echo "Failed to install dependencies / 安装依赖包失败"
         exit 1
     fi
+    echo "Dependencies installed successfully / 依赖包安装成功"
+else
+    echo "Dependencies already installed / 依赖包已安装"
 fi
 
 # 运行程序 / Run the application
