@@ -62,3 +62,6 @@ Thumbs.db
 
 # Gradio cache
 .gradio/
+
+# Old setup files (replaced by platform-specific scripts)
+setup.py
