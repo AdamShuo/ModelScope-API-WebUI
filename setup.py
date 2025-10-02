@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
 """
-ModelScope API WebUI 安装脚本
-用于在没有Python环境的系统上设置项目环境
+ModelScope API WebUI 智能安装脚本
+==================================
+
+这是一个跨平台安装脚本，支持：
+1. 自动检测Python环境
+2. 如果没有Python环境，自动下载并安装Python（仅Windows）
+3. 创建虚拟环境并安装所有依赖
+
+注意：如果系统完全没有Python环境，请使用对应的安装脚本：
+- Windows: 双击运行 setup_windows.bat
+- Linux: 执行 ./setup_linux.sh
 """
 
 import os

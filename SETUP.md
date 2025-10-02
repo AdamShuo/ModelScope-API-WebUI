@@ -66,14 +66,24 @@ python gradio_app.py
 
 ### 方法三：无Python环境安装
 
-如果系统没有安装Python，使用安装脚本：
+如果系统没有安装Python，使用独立安装脚本：
 
-```bash
-# 运行安装脚本（Windows/Linux/macOS通用）
-python setup.py
+#### Windows用户
+双击运行 `setup_windows.bat`，或在命令提示符中执行：
+```cmd
+setup_windows.bat
 ```
 
-该脚本会：
+#### Linux/macOS用户
+```bash
+# 赋予执行权限
+chmod +x setup_linux.sh
+
+# 运行安装脚本
+./setup_linux.sh
+```
+
+安装脚本会：
 1. 检测系统Python环境
 2. 自动下载安装Python（如果需要）
 3. 创建虚拟环境

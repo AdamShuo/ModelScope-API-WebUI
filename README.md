@@ -75,20 +75,6 @@ chmod +x run_linux_smart.sh
 ./run_linux_smart.sh
 ```
 
-#### 💻 无Python环境解决方案
-如果您的系统没有安装Python，请运行安装脚本：
-```bash
-python setup.py
-```
-或下载Python后重新运行智能启动脚本。
-
-#### 💻 无Python环境解决方案
-如果您的系统没有安装Python，请运行安装脚本：
-```bash
-python setup.py
-```
-或下载Python后重新运行智能启动脚本。
-
 #### 🌟 脚本特性
 - ✅ **智能环境检测**：自动检测Python可用性，优先使用虚拟环境Python
 - ✅ **跨平台兼容**：支持Windows、Linux、macOS系统
@@ -126,14 +112,18 @@ python gradio_app.py
 
 ### 🔧 环境设置脚本
 
-项目还提供了环境设置脚本，用于在没有Python环境的系统上自动安装Python和配置项目：
+项目提供了独立安装脚本，适应不同操作系统：
 
+#### Windows 用户
+双击运行 `setup_windows.bat`
+
+#### Linux/macOS 用户
 ```bash
-# 运行环境设置脚本
-python setup.py
+chmod +x setup_linux.sh
+./setup_linux.sh
 ```
 
-该脚本会：
+这些脚本会：
 - 自动检测操作系统类型
 - 下载并安装Python（如果需要）
 - 创建虚拟环境
